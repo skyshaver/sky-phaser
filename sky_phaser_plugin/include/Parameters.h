@@ -4,12 +4,17 @@ namespace sky_phaser {
 	struct Parameters {
 		explicit Parameters(juce::AudioProcessor&);
 
-		juce::AudioParameterFloat& parameterOne;
+		juce::AudioParameterFloat& modulationRate;
 		
-		juce::AudioParameterFloat& parameterTwo;
+		juce::AudioParameterFloat& modulationDepth;
+
+		juce::AudioParameterFloat& feedback;
+
 		
-		// juce::AudioParameterBool& bypassed;
+		juce::AudioParameterBool& bypass;
 		// juce::AudioParameterChoice& waveform;
+
+		static constexpr int versionHint = 1;
 
 		JUCE_DECLARE_NON_COPYABLE(Parameters)
 		JUCE_DECLARE_NON_MOVEABLE(Parameters)

@@ -60,16 +60,14 @@ namespace sky_phaser {
 		int expectedMaxFramesPerBlock) {
 		// Use this method as the place to do any pre-playback
 		// initialization that you need, e.g., allocate memory.
-
-		// dspjp.prepare(sampleRate, expectedMaxFramesPerBlock);
-		phaser.Prepare(sampleRate, expectedMaxFramesPerBlock);
+		
+		phaser.prepare(sampleRate, expectedMaxFramesPerBlock);
 	}
 
 	void PluginProcessor::releaseResources() {
 		// When playback stops, you can use this as an opportunity to free up any
 		// spare memory, etc.
-
-		// dspjp.reset();
+	
 		phaser.reset();
 	}
 
@@ -108,19 +106,18 @@ namespace sky_phaser {
 		for (const auto channelToClear :
 			std::views::iota(totalNumInputChannels, totalNumOutputChannels)) {
 			buffer.clear(channelToClear, 0, buffer.getNumSamples());
-		}
+		}		
 
-		// TODO: update parameters
-		// dspjp.setParameterOne(parameters.parameterOne);
-		// TODO: check for bypass
+		phaser.setFeedback(parameters.feedback.get());
+		phaser.setModulationRate(parameters.modulationRate.get());
+		phaser.setModulationDepth(parameters.modulationDepth.get());
 
-		// apply tremolo
-		// dspjp.process(buffer);
+
 		phaser.process(buffer);
 	}
 
 	bool PluginProcessor::hasEditor() const {
-		return true;
+		return false;
 	}
 
 	// This function will be called to create an instance of the editor

@@ -1,9 +1,7 @@
 
 namespace sky_phaser {
 
-	PluginEditor::PluginEditor(PluginProcessor& p) : AudioProcessorEditor(&p), 
-			parameterOneAttachment{p.getParameterRefs().parameterOne, parameterOneSlider},
-			parameterTwoAttachment{ p.getParameterRefs().parameterTwo, parameterTwoSlider } {
+	PluginEditor::PluginEditor(PluginProcessor& p) : AudioProcessorEditor(&p) {
 
 
 		background.setImage(juce::ImageCache::getFromMemory(assets::Background_png, assets::Background_pngSize));
@@ -15,35 +13,16 @@ namespace sky_phaser {
 		// editor's size to whatever you need it to be.
 		setSize(540, 270);
 
-		// don't need to manually add range as parameterAttachment sets range/interval
-		// parameterOneSlider.setRange(0.01f, 1.f, 0.01f);
-		// parameterOneSlider.setRange(p.getParameterRefs().parameterOne.range.start, p.getParameterRefs().parameterOne.range.end, p.getParameterRefs().parameterOne.range.interval);
-		parameterOneSlider.setSliderStyle(juce::Slider::LinearBarVertical);
-		parameterOneSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		parameterOneSlider.setPopupDisplayEnabled(true, false, this);
-		parameterOneSlider.setTextValueSuffix(" ParamOne");
-		parameterOneSlider.setValue(0.01f);
-		addAndMakeVisible(&parameterOneSlider);
-		
-		parameterTwoSlider.setSliderStyle(juce::Slider::LinearBarVertical);
-		parameterTwoSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-		parameterTwoSlider.setPopupDisplayEnabled(true, false, this);
-		parameterTwoSlider.setTextValueSuffix(" ParamTwo");
-		parameterTwoSlider.setValue(0.01f);
-		addAndMakeVisible(&parameterTwoSlider);
 
-		// listeners
-		// parameterOne.addListener(this);
+
+		
 
 		/*addAndMakeVisible(background);
 		addAndMakeVisible(logo);*/
 	}
 
 	void PluginEditor::resized() {
-		const auto bounds = getLocalBounds();
-
-		parameterOneSlider.setBounds(40, 30, 20, getHeight() - 60);
-		parameterTwoSlider.setBounds(80, 30, 20, getHeight() - 60);
+		const auto bounds = getLocalBounds();		
 		/*logo.setBounds({ 16, 16, 105, 24 });
 		background.setBounds(bounds);*/
 

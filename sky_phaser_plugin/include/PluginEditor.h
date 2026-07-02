@@ -11,12 +11,8 @@ namespace sky_phaser {
 	private:
 
 		// PluginProcessor& pluginProcessor;
-		// void sliderValueChanged(juce::Slider* slider) override;
-		juce::Slider parameterOneSlider;
-		juce::SliderParameterAttachment parameterOneAttachment;
-
-		juce::Slider parameterTwoSlider;
-		juce::SliderParameterAttachment parameterTwoAttachment;
+		
+		
 
 		juce::ImageComponent background;
 		juce::ImageComponent logo;	

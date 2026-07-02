@@ -29,87 +29,25 @@ namespace sky_phaser {
     class Phaser {
     
     public:
-        Phaser()  //initialise to some useful defaults...
-            : feedBack(.7f)
-            , lfoPhase(0.f)
-            , depth(.5f)
-            , zm1(0.f)
+        Phaser()                                 
         {
            
         }
 
-        void Prepare(double sr, int expectedMaxFramesPerBlock) {
-            juce::ignoreUnused(expectedMaxFramesPerBlock);
-            sampleRate = static_cast<float>(sr);
-            // need sampleRate to be set to set these defaults
-            Range(440.f, 1600.f);
-            Rate(.5f);
-        }
+        void prepare(double sr, int expectedMaxFramesPerBlock);
+        void process(juce::AudioBuffer<float>& buffer) noexcept;
 
-        void Range(float fMin, float fMax) { // Hz
-            dmin = fMin / (sampleRate / 2.f);
-            dmax = fMax / (sampleRate / 2.f);
-        }
+        void setRange(float fMin, float fMax); // Hz
 
-        void Rate(float rate) { // cps
-            lfoInc = 2.f * juce::MathConstants<float>::pi * (rate / sampleRate); 
-        }
+        void setModulationRate(float rate); // cps
 
-        void Feedback(float fb) { // 0 -> < 1.
-            feedBack = fb;
-        }
+        void setFeedback(float fb);  // 0 -> < 1.
+        void updateFeedback();
+        
+        void setModulationDepth(float d);   // 0 -> 1.     
+        void updateModulationDepth();
 
-        void Depth(float d) {  // 0 -> 1.
-            depth = d;
-        }
-
-        float Update(float inSamp) {
-            //calculate and update phaser sweep lfo...
-            float d = dmin + (dmax - dmin) * ((sin(lfoPhase) + 1.f) / 2.f);
-            lfoPhase += lfoInc;
-            if (lfoPhase >= juce::MathConstants<float>::pi * 2.f) {
-                lfoPhase -= juce::MathConstants<float>::pi * 2.f;
-            }
-
-            //update filter coeffs
-            //for (int i = 0; i < 6; i++) {
-            //    allPassDelays[i].Delay(d);
-            //}
-
-            for (auto& e : allPassDelays) {
-                e.Delay(d);
-            }
-
-            //calculate output
-            //float y = allPassDelays[0].Update(
-            //    allPassDelays[1].Update(
-            //        allPassDelays[2].Update(
-            //            allPassDelays[3].Update(
-            //                allPassDelays[4].Update(
-            //                    allPassDelays[5].Update(inSamp + zm1 * feedBack))))));
-
-            // updated for readibility, needs testing see https://godbolt.org/z/P54ve5o51 for live test
-            auto y = std::accumulate(std::next(allPassDelays.rbegin()), allPassDelays.rend(),
-                allPassDelays.back().Update(inSamp + zm1 * feedBack), [](auto acc, auto& e) { return e.Update(acc); });
-            zm1 = y;
-
-            return inSamp + y * depth;
-        }
-
-        void process(juce::AudioBuffer<float>& buffer) noexcept {
-
-            // for each frame
-            for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
-                // for each channel sample in the frame
-                for (const auto channelIndex :
-                    std::views::iota(0, buffer.getNumChannels())) {
-                    const auto inputSample = buffer.getSample(channelIndex, frameIndex);
-                    // DBG("output:" << Update(inputSample) << " input: " << inputSample);
-                    const auto outputSample = Update(inputSample);
-                    buffer.setSample(channelIndex, frameIndex, outputSample);
-                }
-            }
-        }
+        float update(float inSamp);
 
         void reset() noexcept {}
 
@@ -136,18 +74,26 @@ namespace sky_phaser {
         private:
             float a1, zm1;
         };
-
-        // AllPassDelay allPassDelays[6];
+        
         std::array<AllPassDelay, 6> allPassDelays;
 
         float dmin, dmax; // range
-        float feedBack; 
-        float lfoPhase;
+        
+        float getNextFeedbackValue();
+        float currentFeedback{ 0.7f };
+        float feedbackToSet = currentFeedback;
+
+        float lfoPhase{ 0.f };        
+
         float lfoInc;
-        float depth;
+
+        float getNextModulationDepthValue();
+        float currentModulationDepth{.4f};
+        float modulationDepthToSet = currentModulationDepth;
+        
         float sampleRate;
 
-        float zm1;
+        float zm1{0.f};
     };
 
 } // namespace sky_phaser
