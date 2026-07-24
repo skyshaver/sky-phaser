@@ -1,0 +1,16 @@
+Parameters:
+    name: Parameters
+    projectNamespace: sky_phaser
+    parameters: 
+        - name: modulationRate
+          juceType: juce::AudioParameterFloat
+          serializerType: float
+          isChoice: false
+        - name: modulationDepth
+          juceType: juce::AudioParameterFloat
+          serializerType: float
+          isChoice: false
+        - name: feedback
+          juceType: juce::AudioParameterFloat
+          serializerType: float
+          isChoice: false

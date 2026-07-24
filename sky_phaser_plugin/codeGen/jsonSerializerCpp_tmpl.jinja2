@@ -4,9 +4,9 @@
 
 namespace {
 	struct SerializableParameters {				
-		float modulationRate;
-		float modulationDepth;
-		float feedback;
+		{% for parameter in parameters.parameters %}
+		{{parameter.serializerType}} {{parameter.name}};
+		{% endfor %}
 
 		static constexpr auto marshallingVersion = 1; //set to std::null_opt to avoid serializing __version__
 
@@ -23,24 +23,24 @@ namespace {
 				return;
 			}			
 
-			archive(juce::named("modulationRate", p.modulationRate),
-				juce::named("modulationDepth", p.modulationDepth),
-				juce::named("feedback", p.feedback));
+{% for parameter in parameters.parameters %}
+{{"\t\t\tarchive(" if loop.first else "\t\t\t\t" }}juce::named("{{parameter.name}}", p.{{parameter.name}}){{");" if loop.last else "," }}
+{% endfor %}
 
 		}
 	};
 
-	SerializableParameters from(const sky_phaser::Parameters& parameters) {
+	SerializableParameters from(const {{parameters.projectNamespace}}::Parameters& parameters) {
 		return {
-			.modulationRate = parameters.modulationRate.get(),	
-			.modulationDepth = parameters.modulationDepth.get(),	
-			.feedback = parameters.feedback.get(),	
+			{% for parameter in parameters.parameters %}
+			.{{parameter.name}} = parameters.{{parameter.name}}{{".getCurrentChoiceName()" if parameter.isChoice == true else ".get()"}},	
+			{% endfor %}
 		};
 	}
 }
 
 
-namespace sky_phaser {
+namespace {{parameters.projectNamespace}} {
 
 
 	void JsonSerializer::serialize(const Parameters& parameters, juce::OutputStream& output) {
@@ -69,12 +69,26 @@ namespace sky_phaser {
 			return juce::Result::fail("failed to parse parameters from json");
 		}
 
-				
+		{% for parameter in parameters.parameters %}
+		{% if parameter.isChoice == true %}
+		const auto {{parameter.name}}Index = parameters.{{parameter.name}}.choices.indexOf(parsedParamaters->{{parameter.name}});
+		if ({{parameter.name}}Index < 0) {			
+			return juce::Result::fail(
+				"invalid {{parameter.name}}; supported values are: " +
+				parameters.{{parameter.name}}.choices.joinIntoString(", ")
+			);
+		}		
+		{% endif %}
+		{% endfor %}				
 
-		parameters.modulationRate = parsedParamaters->modulationRate;		
-		parameters.modulationDepth = parsedParamaters->modulationDepth;		
-		parameters.feedback = parsedParamaters->feedback;		
+		{% for parameter in parameters.parameters %}
+		{% if parameter.isChoice == true %}
+		parameters.{{parameter.name}} = {{parameter.name}}Index;
+		{% else %}
+		parameters.{{parameter.name}} = parsedParamaters->{{parameter.name}};		
+		{% endif %}
+		{% endfor %}
 		return juce::Result::ok();
 		
 	}
-}  // namespace sky_phaser
+}  // namespace {{parameters.projectNamespace}}
